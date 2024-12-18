@@ -2,6 +2,7 @@ package domain
 
 import (
 	"api/first-go/common"
+	"api/first-go/util"
 	"time"
 
 	"errors"
@@ -87,7 +88,7 @@ func (u *User) ValidateUsername() (err error) {
 
 func (u *User) EncryptPassword(salt int) (err error) {
 
-	encryptedPass, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	encryptedPass, err := bcrypt.GenerateFromPassword([]byte(u.Password), salt)
 	if err != nil {
 		return
 	}
@@ -98,4 +99,12 @@ func (u *User) EncryptPassword(salt int) (err error) {
 func (u User) IsExists() bool {
 	
 	return u.Id != ""
+}
+
+func (u User) ComparePassword(plain string) (err error) {
+	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plain))
+}
+
+func (u User) GenerateToken() (tokenString string, err error) {
+	return util.GenerateToken(u.Id, string(u.Email))
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"api/first-go/auth"
+	"api/first-go/apps/auth/presentation/controller"
 	"api/first-go/common"
 	"api/first-go/configs"
 	"log"
@@ -31,7 +31,8 @@ func main() {
 
 	router.Use(common.LoggerMiddleware())
 
-	auth.Init(router, db)
+	controller.AuthRoute(router, db)
+	controller.UserRoute(router, db)
 
 	router.Listen(configs.Cfg.App.Port)
 }

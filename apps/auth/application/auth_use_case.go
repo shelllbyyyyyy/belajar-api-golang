@@ -1,23 +1,19 @@
 package application
 
 import (
-	"api/first-go/auth/domain"
+	"api/first-go/apps/auth/domain"
+	"api/first-go/apps/auth/infrastructure"
 	"api/first-go/common"
 	"api/first-go/configs"
 
 	"context"
 )
 
-type Repository interface {
-	FindByEmail(ctx context.Context, email string) (model domain.User, err error)
-	CreateAuth(ctx context.Context, model domain.User) (err error)
-}
-
 type AuthUseCase struct {
-	repo Repository 
+	repo infrastructure.UserRepository 
 }
 
-func NewAuthUseCase(repo Repository) (AuthUseCase) {
+func NewAuthUseCase(repo infrastructure.UserRepository) (AuthUseCase) {
 	return AuthUseCase{
 		repo: repo,
 	}
@@ -51,4 +47,28 @@ func (u AuthUseCase) Register(ctx context.Context, req RegisterRequestPayload) (
 	}
 
 	return u.repo.CreateAuth(ctx, *user)
+}
+
+func (u AuthUseCase) Login(ctx context.Context, req LoginRequestPayload) (token string, err error) {
+	payload := domain.LoginUserSchema{
+		Email: req.Email,
+		Password: req.Password,
+	}
+
+	model, err := u.repo.FindByEmail(ctx, payload.Email)
+	if err != nil { 
+		err = common.ErrNotFound
+		
+		return
+	}
+
+	if err = model.ComparePassword(payload.Password); err != nil {
+		err = common.ErrPasswordNotMatch
+
+		return
+	}
+	
+
+	token, err = model.GenerateToken()
+	return 
 }

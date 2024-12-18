@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"api/first-go/auth/domain"
+	"api/first-go/apps/auth/domain"
 	"api/first-go/common"
 
 	"github.com/jmoiron/sqlx"
@@ -14,7 +14,7 @@ type repository struct {
 	db *sqlx.DB
 }
 
-func NewRepository(db *sqlx.DB) repository {
+func NewUserRepository(db *sqlx.DB) repository {
 	return repository{
 		db: db,
 	}
@@ -48,6 +48,25 @@ func (r repository) FindByEmail(ctx context.Context, email string) (model domain
 	WHERE email = $1`
 
 	err = r.db.GetContext(ctx, &model, query, email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = common.ErrNotFound
+			return
+		}
+
+		return
+	}
+
+	return
+}
+
+func (r repository) FindById(ctx context.Context, id string) (model domain.User, err error) {
+	query := `
+	SELECT id, username, email, password, created_at, updated_at
+	FROM public.users
+	WHERE id = $1`
+
+	err = r.db.GetContext(ctx, &model, query, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = common.ErrNotFound
