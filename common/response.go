@@ -8,7 +8,7 @@ type Response struct {
 	HttpCode  int         `json:"-"`
 	Success   bool        `json:"success"`
 	Message   string      `json:"message"`
-	Payload   interface{} `json:"payload,omitempty"`
+	Data   	  interface{} `json:"data,omitempty"`
 	Query     interface{} `json:"query,omitempty"`
 	Error     string      `json:"error,omitempty"`
 	ErrorCode string      `json:"error_code,omitempty"`
@@ -38,9 +38,9 @@ func WithMessage(message string) func(*Response) *Response {
 		return r
 	}
 }
-func WithPayload(payload interface{}) func(*Response) *Response {
+func WithData(data interface{}) func(*Response) *Response {
 	return func(r *Response) *Response {
-		r.Payload = payload
+		r.Data = data
 		return r
 	}
 }

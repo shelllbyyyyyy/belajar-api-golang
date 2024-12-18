@@ -1,20 +1,33 @@
 package util
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(id string, email string, secret string) (tokenString string, err error) {
+
+func GenerateToken(id string, email string) (tokenString string, err error) {
+	privateKeyPath := getKeyPath("private.pem")
+
+	key, e := LoadPrivate(privateKeyPath)
+	if e != nil {
+		log.Fatal(e)
+	}
+
 	claims := jwt.MapClaims{
 		"id":   id,
 		"email": email,
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
 
-	tokenString, err = token.SignedString([]byte(secret))
+	tokenString, err = token.SignedString(key)
 	if err != nil {
 		return "", err
 	}
@@ -22,13 +35,20 @@ func GenerateToken(id string, email string, secret string) (tokenString string, 
 	return tokenString, nil
 }
 
-func ValidateToken(tokenString string, secret string) (id string, email string, err error) {
+func ValidateToken(tokenString string) (id string, email string, err error) {
+	publicKeyPath := getKeyPath("public.pem")
+
+	key, e := LoadPublic(publicKeyPath)
+	if e != nil {
+		log.Fatal(e)
+	}
+
 	tokens, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
 
-		return []byte(secret), nil
+		return key, nil
 	})
 
 	if err != nil {
@@ -44,4 +64,42 @@ func ValidateToken(tokenString string, secret string) (id string, email string, 
 
 	err = fmt.Errorf("unable to extract claims")
 	return
+}
+
+func getKeyPath(name string) string {
+	execDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get working directory: %v", err)
+	}
+	return filepath.Join(execDir, "configs", "keys", name)
+}
+
+func LoadPrivate(filepath string) (any, error) {
+	pemData, e := os.ReadFile(filepath)
+	if e != nil {
+		return nil, e
+	}
+  
+	pemBlock, _ := pem.Decode(pemData)
+	if pemBlock == nil || pemBlock.Type != "PRIVATE KEY" {
+		return nil, fmt.Errorf("failed to decode PEM block containing private key")
+	}
+	priv, e := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
+  
+	return priv, e
+}
+
+func LoadPublic(filepath string) (any, error) {
+	pemData, e := os.ReadFile(filepath)
+	if e != nil {
+		return nil, e
+	}
+
+	pemBlock, _ := pem.Decode(pemData)
+	if pemBlock == nil || pemBlock.Type != "PUBLIC KEY" {
+		return nil, fmt.Errorf("failed to decode PEM block containing public key")
+	}
+	priv, e := x509.ParsePKIXPublicKey(pemBlock.Bytes)
+  
+	return priv, e
 }

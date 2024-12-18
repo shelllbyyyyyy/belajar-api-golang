@@ -1,7 +1,6 @@
 package common
 
 import (
-	"api/first-go/configs"
 	"api/first-go/util"
 	"context"
 	"strings"
@@ -70,7 +69,7 @@ func CheckAuth() fiber.Handler {
 
 		token := bearer[1]
 
-		id, email, err := util.ValidateToken(token, configs.Cfg.App.Encryption.JWTSecret)
+		id, email, err := util.ValidateToken(token)
 		if err != nil {
 			log.Println(err.Error())
 			return NewResponse(
