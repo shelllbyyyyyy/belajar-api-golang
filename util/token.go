@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -23,6 +24,7 @@ func GenerateToken(id string, email string) (tokenString string, err error) {
 	claims := jwt.MapClaims{
 		"id":   id,
 		"email": email,
+		"exp": jwt.NewNumericDate(time.Now().Add(15 * time.Minute)).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
