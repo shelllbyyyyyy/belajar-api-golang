@@ -1,0 +1,61 @@
+package infrastructure
+
+import (
+	"context"
+	"database/sql"
+
+	"api/first-go/auth/domain"
+	"api/first-go/common"
+
+	"github.com/jmoiron/sqlx"
+)
+
+type repository struct {
+	db *sqlx.DB
+}
+
+func NewRepository(db *sqlx.DB) repository {
+	return repository{
+		db: db,
+	}
+}
+
+func (r repository) CreateAuth(ctx context.Context, model domain.User) (err error) {
+	query := `
+		INSERT INTO public.users (
+			id, username, email, password, created_at, updated_at
+		) VALUES (
+			:id, :username, :email, :password, :created_at, :updated_at
+		)
+	`
+
+	stmt, err := r.db.PrepareNamedContext(ctx, query)
+	if err != nil {
+		return
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx, model)
+
+	return
+}
+
+func (r repository) FindByEmail(ctx context.Context, email string) (model domain.User, err error) {
+	query := `
+	SELECT id, username, email, password, created_at, updated_at
+	FROM public.users
+	WHERE email = $1`
+
+	err = r.db.GetContext(ctx, &model, query, email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = common.ErrNotFound
+			return
+		}
+
+		return
+	}
+
+	return
+}
