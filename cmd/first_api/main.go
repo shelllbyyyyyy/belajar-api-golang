@@ -5,6 +5,7 @@ import (
 	"api/first-go/common"
 	"api/first-go/configs"
 	_ "api/first-go/docs/first_api"
+	"api/first-go/scripts"
 	"log"
 	"os"
 	"path/filepath"
@@ -36,6 +37,8 @@ func main() {
     if err != nil {
         panic(err)
     }
+
+	migrator := scripts.MustGetNewMigrator()
     
     err = godotenv.Load(filepath.Join(pwd, "configs", ".env"))
     if err != nil {
@@ -51,6 +54,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	defer db.Close()
+
+	err = migrator.ApplyMigrations(db.DB)
+ 	if err != nil {
+		log.Println(err)
+ 	}
 
 	if db != nil {
 		log.Println("db connected")
