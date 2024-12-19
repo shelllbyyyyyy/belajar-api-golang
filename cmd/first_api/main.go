@@ -4,14 +4,33 @@ import (
 	"api/first-go/apps/auth/presentation/controller"
 	"api/first-go/common"
 	"api/first-go/configs"
+	_ "api/first-go/docs/first_api"
 	"log"
 	"os"
 	"path/filepath"
 
+	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 )
 
+// @title Fiber Swagger Example API
+// @version 2.0
+// @description This is a sample server server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:4000
+// @BasePath /
+// @schemes http
 func main() {
 	pwd, err := os.Getwd()
     if err != nil {
@@ -37,15 +56,40 @@ func main() {
 		log.Println("db connected")
 	}
 
-	router := fiber.New(fiber.Config{
+	app := fiber.New(fiber.Config{
 		Prefork: true,
 		AppName: configs.Cfg.App.Name,
 	})
 
-	router.Use(common.LoggerMiddleware())
+	app.Use(recover.New())
+	app.Use(cors.New())
+	app.Use(common.LoggerMiddleware())
 
-	controller.AuthRoute(router, db)
-	controller.UserRoute(router, db)
+	app.Get("/", HealthCheck)
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
-	router.Listen(configs.Cfg.App.Port)
+	controller.AuthRoute(app, db)
+	controller.UserRoute(app, db)
+
+	app.Listen(configs.Cfg.App.Port)
+}
+
+// HealthCheck godoc
+// @Summary Show the status of server.
+// @Description get the status of server.
+// @Tags root
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router / [get]
+func HealthCheck(c *fiber.Ctx) error {
+	res := map[string]interface{}{
+		"data": "Server is up and running",
+	}
+
+	if err := c.JSON(res); err != nil {
+		return err
+	}
+
+	return nil
 }
