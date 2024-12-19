@@ -5,11 +5,24 @@ import (
 	"api/first-go/common"
 	"api/first-go/configs"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	pwd, err := os.Getwd()
+    if err != nil {
+        panic(err)
+    }
+    
+    err = godotenv.Load(filepath.Join(pwd, "configs", ".env"))
+    if err != nil {
+        log.Fatal("Error loading .env file")
+    }
+	
 	filename := "./config.yaml"
 	if err := configs.LoadConfig(filename); err != nil {
 		panic(err)

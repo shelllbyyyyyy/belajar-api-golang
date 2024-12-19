@@ -46,5 +46,25 @@ func LoadConfig(filename string) (err error) {
 		return
 	}
 
+	if database_host := os.Getenv("DATABASE_HOST"); database_host != "" {
+		Cfg.DB.Host = database_host
+	}
+
+	if database_port := os.Getenv("DATABASE_PORT"); database_port != "" {
+		Cfg.DB.Port = database_port
+	}
+
+	if database_name := os.Getenv("DATABASE_NAME"); database_name != "" {
+		Cfg.DB.Name = database_name
+	}
+
+	if database_username := os.Getenv("DATABASE_USERNAME"); database_username != "" {
+		Cfg.DB.User = database_username
+	}
+
+	if database_password := os.Getenv("DATABASE_PASSWORD"); database_password != "" {
+		Cfg.DB.Password = database_password
+	}
+
 	return yaml.Unmarshal(configByte, &Cfg)
 }
