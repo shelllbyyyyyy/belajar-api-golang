@@ -13,7 +13,7 @@ import (
 )
 
 
-func GenerateToken(id string, email string) (tokenString string, err error) {
+func GenerateToken(id string, email string, exp float64) (tokenString string, err error) {
 	privateKeyPath := getKeyPath("private.pem")
 
 	key, e := LoadPrivate(privateKeyPath)
@@ -24,7 +24,7 @@ func GenerateToken(id string, email string) (tokenString string, err error) {
 	claims := jwt.MapClaims{
 		"id":   id,
 		"email": email,
-		"exp": jwt.NewNumericDate(time.Now().Add(15 * time.Minute)).Unix(),
+		"exp": jwt.NewNumericDate(time.Now().Add(time.Duration(exp) * time.Minute)).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)

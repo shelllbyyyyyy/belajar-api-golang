@@ -56,6 +56,7 @@ func CheckAuth() fiber.Handler {
 		if authorization == "" {
 			return NewResponse(
 				WithError(ErrorUnauthorized),
+				WithMessage("Access token required"),
 			).Send(c)
 		}
 
@@ -74,6 +75,32 @@ func CheckAuth() fiber.Handler {
 			log.Println(err.Error())
 			return NewResponse(
 				WithError(ErrorUnauthorized),
+				WithMessage("Access token expired"),
+			).Send(c)
+		}
+
+		c.Locals("email", email)
+		c.Locals("id", id)
+
+		return c.Next()
+	}
+}
+
+func RefreshToken() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		authorization := c.Cookies("refresh_token")
+		if authorization == "" {
+			return NewResponse(
+				WithError(ErrorForbiddenAccess),
+				WithMessage("Refresh token required"),
+				).Send(c)
+			}
+			
+			id, email, err := util.ValidateToken(authorization)
+			if err != nil {
+				return NewResponse(
+					WithError(ErrorUnauthorized),
+					WithMessage("Refresh token expired"),
 			).Send(c)
 		}
 

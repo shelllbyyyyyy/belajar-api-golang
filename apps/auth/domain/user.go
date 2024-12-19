@@ -105,6 +105,6 @@ func (u User) ComparePassword(plain string) (err error) {
 	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plain))
 }
 
-func (u User) GenerateToken() (tokenString string, err error) {
-	return util.GenerateToken(u.Id, string(u.Email))
+func (u User) GenerateToken(exp float64) (tokenString string, err error) {
+	return util.GenerateToken(u.Id, string(u.Email), exp)
 }

@@ -46,7 +46,7 @@ var (
 	ErrorBadRequest      = NewError("Bad Request", "400", http.StatusBadRequest)
 	ErrorNotFound        = NewError(ErrNotFound.Error(), "404", http.StatusNotFound)
 	ErrorUnauthorized    = NewError(ErrUnauthorized.Error(), "401", http.StatusUnauthorized)
-	ErrorForbiddenAccess = NewError(ErrForbiddenAccess.Error(), "401", http.StatusForbidden)
+	ErrorForbiddenAccess = NewError(ErrForbiddenAccess.Error(), "403", http.StatusForbidden)
 )
 
 var (

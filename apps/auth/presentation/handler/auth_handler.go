@@ -4,6 +4,7 @@ import (
 	"api/first-go/apps/auth/application"
 	"api/first-go/common"
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -63,6 +64,46 @@ func (h AuthHandler) Login(ctx *fiber.Ctx) error {
 	}
 
 	token, err := h.usecase.Login(ctx.UserContext(), req)
+    if err != nil {
+		myErr, ok := common.ErrorMapping[err.Error()]
+		if !ok {
+			myErr = common.ErrorGeneral
+		}
+
+		return common.NewResponse(
+			common.WithMessage(err.Error()),
+			common.WithError(myErr),
+		).Send(ctx)
+	}
+
+	cookie := new(fiber.Cookie)
+  	cookie.Name = "refresh_token"
+  	cookie.Value = token.RefreshToken
+  	cookie.Expires = time.Now().Add(7 *24 * time.Hour)
+	cookie.Secure = true
+	cookie.HTTPOnly = true
+
+	ctx.Cookie(cookie)
+
+	return common.NewResponse(
+		common.WithHttpCode(http.StatusOK),
+		common.WithMessage("Login successfully"),
+		common.WithData(map[string]interface{}{
+			"access_token": token.AccessToken,
+		}),
+	).Send(ctx)
+}
+
+func (h AuthHandler) Refresh(ctx *fiber.Ctx) error {
+	id := ctx.Locals("id")
+	email := ctx.Locals("email")
+
+	req := application.TokenPayload{
+		Id: id.(string),
+		Email: email.(string),
+	}
+
+	token, err := h.usecase.Refresh(ctx.UserContext(), req)
     if err != nil {
 		myErr, ok := common.ErrorMapping[err.Error()]
 		if !ok {

@@ -4,6 +4,7 @@ import (
 	"api/first-go/apps/auth/application"
 	"api/first-go/apps/auth/infrastructure"
 	handler "api/first-go/apps/auth/presentation/handler"
+	"api/first-go/common"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
@@ -20,5 +21,6 @@ func AuthRoute(router fiber.Router, db *sqlx.DB) {
 	{
 		authRouter.Post("/register", handler.Register)
 		authRouter.Post("/login", handler.Login)
+		authRouter.Get("/refresh", common.RefreshToken(), handler.Refresh)
 	}
 }

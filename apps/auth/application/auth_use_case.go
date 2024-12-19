@@ -5,9 +5,15 @@ import (
 	"api/first-go/apps/auth/infrastructure"
 	"api/first-go/common"
 	"api/first-go/configs"
+	"api/first-go/util"
 
 	"context"
 )
+
+type Token struct {
+	AccessToken string 	`json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
 
 type AuthUseCase struct {
 	repo infrastructure.UserRepository 
@@ -49,7 +55,7 @@ func (u AuthUseCase) Register(ctx context.Context, req RegisterRequestPayload) (
 	return u.repo.CreateAuth(ctx, *user)
 }
 
-func (u AuthUseCase) Login(ctx context.Context, req LoginRequestPayload) (token string, err error) {
+func (u AuthUseCase) Login(ctx context.Context, req LoginRequestPayload) (*Token, error) {
 	payload := domain.LoginUserSchema{
 		Email: req.Email,
 		Password: req.Password,
@@ -59,16 +65,33 @@ func (u AuthUseCase) Login(ctx context.Context, req LoginRequestPayload) (token 
 	if err != nil { 
 		err = common.ErrNotFound
 		
-		return
+		return nil, err
 	}
 
 	if err = model.ComparePassword(payload.Password); err != nil {
 		err = common.ErrPasswordNotMatch
 
-		return
+		return nil, err
+	}
+
+	access_token, err := model.GenerateToken(15)
+	if err != nil {
+		return nil, err
+	}
+
+	refresh_token, err := model.GenerateToken(60 * 7 * 24)
+	if err != nil {
+		return nil, err
 	}
 	
+	return &Token{AccessToken: access_token, RefreshToken: refresh_token}, nil
+}
 
-	token, err = model.GenerateToken()
-	return 
+func (u AuthUseCase) Refresh(ctx context.Context, req TokenPayload) (string, error) {
+	token, err := util.GenerateToken(req.Id, req.Email, 15)
+	if err != nil {
+		return "", err
+	}
+	
+	return token, nil	
 }
