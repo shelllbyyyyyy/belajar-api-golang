@@ -12,5 +12,5 @@ type LoginRequestPayload struct {
 }
 
 type TokenPayload struct {
-	Id, Email string
+	Id, Role string
 }

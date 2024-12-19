@@ -70,7 +70,7 @@ func CheckAuth() fiber.Handler {
 
 		token := bearer[1]
 
-		id, email, err := util.ValidateToken(token)
+		id, role, err := util.ValidateToken(token)
 		if err != nil {
 			log.Println(err.Error())
 			return NewResponse(
@@ -79,7 +79,7 @@ func CheckAuth() fiber.Handler {
 			).Send(c)
 		}
 
-		c.Locals("email", email)
+		c.Locals("role", role)
 		c.Locals("id", id)
 
 		return c.Next()
@@ -96,7 +96,7 @@ func RefreshToken() fiber.Handler {
 				).Send(c)
 			}
 			
-			id, email, err := util.ValidateToken(authorization)
+			id, role, err := util.ValidateToken(authorization)
 			if err != nil {
 				return NewResponse(
 					WithError(ErrorUnauthorized),
@@ -104,7 +104,49 @@ func RefreshToken() fiber.Handler {
 			).Send(c)
 		}
 
-		c.Locals("email", email)
+		c.Locals("role", role)
+		c.Locals("id", id)
+
+		return c.Next()
+	}
+}
+
+func Admin() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		authorization := c.Get("Authorization")
+		if authorization == "" {
+			return NewResponse(
+				WithError(ErrorUnauthorized),
+				WithMessage("Access token required"),
+			).Send(c)
+		}
+
+		bearer := strings.Split(authorization, "Bearer ")
+		if len(bearer) != 2 {
+			log.Println("token invalid")
+			return NewResponse(
+				WithError(ErrorUnauthorized),
+			).Send(c)
+		}
+
+		token := bearer[1]
+
+		id, role, err := util.ValidateToken(token)
+		if err != nil {
+			return NewResponse(
+				WithError(ErrorUnauthorized),
+				WithMessage("Access token expired"),
+			).Send(c)
+		}
+
+		if role != "admin" {
+			return NewResponse(
+				WithError(ErrorForbiddenAccess),
+				WithMessage("Only admin can access this"),
+			).Send(c)
+		}
+
+		c.Locals("role", role)
 		c.Locals("id", id)
 
 		return c.Next()

@@ -88,7 +88,7 @@ func (u AuthUseCase) Login(ctx context.Context, req LoginRequestPayload) (*Token
 }
 
 func (u AuthUseCase) Refresh(ctx context.Context, req TokenPayload) (string, error) {
-	token, err := util.GenerateToken(req.Id, req.Email, 15)
+	token, err := util.GenerateToken(req.Id, req.Role, 15)
 	if err != nil {
 		return "", err
 	}

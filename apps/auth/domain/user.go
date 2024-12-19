@@ -12,11 +12,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Role string
+
+const (
+    UserRole  Role = "user"
+    AdminRole Role = "admin"
+)
+
 type User struct {
 	Id       	string 		`db:"id"`
 	Username 	string		`db:"username"`
 	Email    	string		`db:"email"`
 	Password 	string		`db:"password"`
+	Role		string		`db:"role"`
 	CreatedAt 	time.Time 	`db:"created_at"`
 	UpdatedAt 	time.Time 	`db:"updated_at"`
 }
@@ -31,6 +39,7 @@ func NewUser(r RegisterUserSchema) (*User, error) {
 		Email: r.Email, 
 		Username: r.Username, 
 		Password: r.Password,
+		Role: string(UserRole),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		}, nil
@@ -106,5 +115,5 @@ func (u User) ComparePassword(plain string) (err error) {
 }
 
 func (u User) GenerateToken(exp float64) (tokenString string, err error) {
-	return util.GenerateToken(u.Id, string(u.Email), exp)
+	return util.GenerateToken(u.Id, u.Role, exp)
 }

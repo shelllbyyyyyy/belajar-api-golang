@@ -13,7 +13,7 @@ import (
 )
 
 
-func GenerateToken(id string, email string, exp float64) (tokenString string, err error) {
+func GenerateToken(id string, role string, exp float64) (tokenString string, err error) {
 	privateKeyPath := getKeyPath("private.pem")
 
 	key, e := LoadPrivate(privateKeyPath)
@@ -23,7 +23,7 @@ func GenerateToken(id string, email string, exp float64) (tokenString string, er
 
 	claims := jwt.MapClaims{
 		"id":   id,
-		"email": email,
+		"role": role,
 		"exp": jwt.NewNumericDate(time.Now().Add(time.Duration(exp) * time.Minute)).Unix(),
 	}
 
@@ -37,7 +37,7 @@ func GenerateToken(id string, email string, exp float64) (tokenString string, er
 	return tokenString, nil
 }
 
-func ValidateToken(tokenString string) (id string, email string, err error) {
+func ValidateToken(tokenString string) (id string, role string, err error) {
 	publicKeyPath := getKeyPath("public.pem")
 
 	key, e := LoadPublic(publicKeyPath)
@@ -60,7 +60,7 @@ func ValidateToken(tokenString string) (id string, email string, err error) {
 	claims, ok := tokens.Claims.(jwt.MapClaims)
 	if ok && tokens.Valid {
 		id = fmt.Sprintf("%v", claims["id"])
-		email = fmt.Sprintf("%v", claims["email"])
+		role = fmt.Sprintf("%v", claims["role"])
 		return
 	}
 

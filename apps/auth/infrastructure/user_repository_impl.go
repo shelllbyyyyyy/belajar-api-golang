@@ -43,7 +43,7 @@ func (r repository) CreateAuth(ctx context.Context, model domain.User) (err erro
 
 func (r repository) FindByEmail(ctx context.Context, email string) (model domain.User, err error) {
 	query := `
-	SELECT id, username, email, password, created_at, updated_at
+	SELECT id, username, email, password, role, created_at, updated_at
 	FROM public.users
 	WHERE email = $1`
 
@@ -62,7 +62,7 @@ func (r repository) FindByEmail(ctx context.Context, email string) (model domain
 
 func (r repository) FindById(ctx context.Context, id string) (model domain.User, err error) {
 	query := `
-	SELECT id, username, email, password, created_at, updated_at
+	SELECT id, username, email, password, role, created_at, updated_at
 	FROM public.users
 	WHERE id = $1`
 

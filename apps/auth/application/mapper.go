@@ -7,6 +7,7 @@ func ToUserResponse(model domain.User) UserResponse {
 		Id:   model.Id,
 		Username: model.Username,
 		Email: model.Email,
+		Role: model.Role,
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 	}

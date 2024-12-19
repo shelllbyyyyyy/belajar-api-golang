@@ -96,11 +96,11 @@ func (h AuthHandler) Login(ctx *fiber.Ctx) error {
 
 func (h AuthHandler) Refresh(ctx *fiber.Ctx) error {
 	id := ctx.Locals("id")
-	email := ctx.Locals("email")
+	role := ctx.Locals("role")
 
 	req := application.TokenPayload{
 		Id: id.(string),
-		Email: email.(string),
+		Role: role.(string),
 	}
 
 	token, err := h.usecase.Refresh(ctx.UserContext(), req)
