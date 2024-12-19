@@ -22,16 +22,11 @@ func NewUserHandler(uc application.UserUseCase) UserHandler {
 func (h UserHandler) FindByEmail(ctx *fiber.Ctx) error {
     var param = ctx.Params("email")
 
-	model, err := h.usecase.FindByEmail(ctx.UserContext(), param)
-    if err != nil {
-		myErr, ok := common.ErrorMapping[err.Error()]
-		if !ok {
-			myErr = common.ErrorGeneral
-		}
-
+	model := h.usecase.FindByEmail(ctx.UserContext(), param)
+    if model == nil {
 		return common.NewResponse(
-			common.WithMessage(err.Error()),
-			common.WithError(myErr),
+			common.WithMessage("User not found"),
+			common.WithError(common.ErrorNotFound),
 		).Send(ctx)
 	}
 
@@ -60,7 +55,7 @@ func (h UserHandler) FindById(ctx *fiber.Ctx) error {
 		).Send(ctx)
 	} 
 
-	response := application.ToUserResponse(model)
+	response := application.ToUserResponse(&model)
 
 	return common.NewResponse(
 		common.WithHttpCode(http.StatusOK),

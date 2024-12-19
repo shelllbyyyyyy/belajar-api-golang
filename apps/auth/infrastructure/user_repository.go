@@ -6,7 +6,7 @@ import (
 )
 
 type UserRepository interface {
-	FindByEmail(ctx context.Context, email string) (model domain.User, err error)
+	FindByEmail(ctx context.Context, email string) (*domain.User, error)
 	FindById(ctx context.Context, id string) (model domain.User, err error)
 	CreateAuth(ctx context.Context, model domain.User) (err error)
 }

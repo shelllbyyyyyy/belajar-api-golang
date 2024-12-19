@@ -41,34 +41,11 @@ func (u AuthUseCase) Register(ctx context.Context, req RegisterRequestPayload) (
 		return
 	}
 
-	model, err := u.repo.FindByEmail(ctx, user.Email)
-	if err != nil {
-		if err != common.ErrNotFound {
-			return
-		}
-	}
-
-	if model.IsExists() {
-		return common.ErrEmailAlreadyUsed
-	}
-
 	return u.repo.CreateAuth(ctx, *user)
 }
 
-func (u AuthUseCase) Login(ctx context.Context, req LoginRequestPayload) (*Token, error) {
-	payload := domain.LoginUserSchema{
-		Email: req.Email,
-		Password: req.Password,
-	}
-
-	model, err := u.repo.FindByEmail(ctx, payload.Email)
-	if err != nil { 
-		err = common.ErrNotFound
-		
-		return nil, err
-	}
-
-	if err = model.ComparePassword(payload.Password); err != nil {
+func (u AuthUseCase) Login(ctx context.Context, model *domain.User, inputPassword string) (*Token, error) {
+	if err := model.ComparePassword(inputPassword); err != nil {
 		err = common.ErrPasswordNotMatch
 
 		return nil, err

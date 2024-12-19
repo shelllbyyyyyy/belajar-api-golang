@@ -41,23 +41,24 @@ func (r repository) CreateAuth(ctx context.Context, model domain.User) (err erro
 	return
 }
 
-func (r repository) FindByEmail(ctx context.Context, email string) (model domain.User, err error) {
+func (r repository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	query := `
 	SELECT id, username, email, password, role, created_at, updated_at
 	FROM public.users
 	WHERE email = $1`
 
-	err = r.db.GetContext(ctx, &model, query, email)
+	var user domain.User
+	err := r.db.GetContext(ctx, &user, query, email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = common.ErrNotFound
-			return
+			
+			return nil, common.ErrNotFound
 		}
 
-		return
+		return nil, err
 	}
 
-	return
+	return &user, nil
 }
 
 func (r repository) FindById(ctx context.Context, id string) (model domain.User, err error) {

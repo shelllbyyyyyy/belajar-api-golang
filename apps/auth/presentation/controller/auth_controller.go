@@ -12,8 +12,9 @@ import (
 
 func AuthRoute(router fiber.Router, db *sqlx.DB) {
 	repo := infrastructure.NewUserRepository(db)
-	usecase := application.NewAuthUseCase(repo)
-	handler := handler.NewAuthHandler(usecase)
+	auth := application.NewAuthUseCase(repo)
+	user := application.NewUserUseCase(repo)
+	handler := handler.NewAuthHandler(auth, user)
 
 	_ = handler
 

@@ -10,12 +10,14 @@ import (
 )
 
 type AuthHandler struct {
-    usecase application.AuthUseCase
+    auth application.AuthUseCase
+    user application.UserUseCase
 }
 
-func NewAuthHandler(uc application.AuthUseCase) AuthHandler {
+func NewAuthHandler(au application.AuthUseCase, uu application.UserUseCase) AuthHandler {
     return AuthHandler{
-		usecase: uc,
+		auth: au,
+		user: uu,
 	}
 }
 
@@ -32,7 +34,16 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 		).Send(ctx)
 	}
 
-    if err := h.usecase.Register(ctx.UserContext(), req); err != nil {
+	model := h.user.FindByEmail(ctx.UserContext(), req.Email)
+	if model.IsExists() {
+		return common.NewResponse(
+			common.WithMessage("Email has already been registered"),
+			common.WithError(common.ErrorEmailAlreadyUsed),
+			common.WithHttpCode(http.StatusConflict),
+		).Send(ctx)
+	}
+
+    if err := h.auth.Register(ctx.UserContext(), req); err != nil {
 		myErr, ok := common.ErrorMapping[err.Error()]
 		if !ok {
 			myErr = common.ErrorGeneral
@@ -63,7 +74,15 @@ func (h AuthHandler) Login(ctx *fiber.Ctx) error {
 		).Send(ctx)
 	}
 
-	token, err := h.usecase.Login(ctx.UserContext(), req)
+	model := h.user.FindByEmail(ctx.UserContext(), req.Email)
+	if  model == nil { 
+		return common.NewResponse(
+			common.WithMessage("Email not registered"),
+			common.WithError(common.ErrorNotFound),
+		).Send(ctx)
+	}
+
+	token, err := h.auth.Login(ctx.UserContext(), model, req.Password)
     if err != nil {
 		myErr, ok := common.ErrorMapping[err.Error()]
 		if !ok {
@@ -103,7 +122,7 @@ func (h AuthHandler) Refresh(ctx *fiber.Ctx) error {
 		Role: role.(string),
 	}
 
-	token, err := h.usecase.Refresh(ctx.UserContext(), req)
+	token, err := h.auth.Refresh(ctx.UserContext(), req)
     if err != nil {
 		myErr, ok := common.ErrorMapping[err.Error()]
 		if !ok {

@@ -18,15 +18,10 @@ func NewUserUseCase(repo infrastructure.UserRepository) UserUseCase {
 	}
 }
 
-func (u UserUseCase) FindByEmail(ctx context.Context, email string) (model domain.User, err error) {
-	model, err = u.repo.FindByEmail(ctx, email)
-	if err != nil {
-		if err != common.ErrNotFound {
-			return
-		}
-	}
+func (u UserUseCase) FindByEmail(ctx context.Context, email string) (*domain.User) {
+	model, _ := u.repo.FindByEmail(ctx, email)
 
-	return
+	return model
 }
 
 func (u UserUseCase) FindById(ctx context.Context, id string) (model domain.User, err error) {
@@ -35,6 +30,8 @@ func (u UserUseCase) FindById(ctx context.Context, id string) (model domain.User
 		if err != common.ErrNotFound {
 			return
 		}
+
+		return
 	}
 
 	return
