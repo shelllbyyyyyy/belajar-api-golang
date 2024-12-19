@@ -34,8 +34,8 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 		).Send(ctx)
 	}
 
-	model := h.user.FindByEmail(ctx.UserContext(), req.Email)
-	if model.IsExists() {
+	_, err := h.user.FindByEmail(ctx.UserContext(), req.Email)
+	if err == nil {
 		return common.NewResponse(
 			common.WithMessage("Email has already been registered"),
 			common.WithError(common.ErrorEmailAlreadyUsed),
@@ -74,8 +74,8 @@ func (h AuthHandler) Login(ctx *fiber.Ctx) error {
 		).Send(ctx)
 	}
 
-	model := h.user.FindByEmail(ctx.UserContext(), req.Email)
-	if  model == nil { 
+	model, err := h.user.FindByEmail(ctx.UserContext(), req.Email)
+	if  err != nil { 
 		return common.NewResponse(
 			common.WithMessage("Email not registered"),
 			common.WithError(common.ErrorNotFound),

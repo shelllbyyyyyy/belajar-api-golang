@@ -61,21 +61,55 @@ func (r repository) FindByEmail(ctx context.Context, email string) (*domain.User
 	return &user, nil
 }
 
-func (r repository) FindById(ctx context.Context, id string) (model domain.User, err error) {
+func (r repository) FindById(ctx context.Context, id string) (*domain.User, error) {
 	query := `
 	SELECT id, username, email, password, role, created_at, updated_at
 	FROM public.users
 	WHERE id = $1`
 
-	err = r.db.GetContext(ctx, &model, query, id)
+	var user domain.User
+	err := r.db.GetContext(ctx, &user, query, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = common.ErrNotFound
-			return
+			
+			return nil, common.ErrNotFound
 		}
 
-		return
+		return nil, err
 	}
 
-	return
+	return &user, nil
+}
+
+func (r repository) Update(ctx context.Context, id string, payload *domain.UpdateUserSchema) (bool, error) {
+	query := `
+	UPDATE public.users
+	SET username = COALESCE($1, username),
+    	email = COALESCE($2, email),
+    	password = COALESCE($3, password),
+    	is_deleted = COALESCE($4, is_deleted),
+		role = COALESCE($5, role)
+	WHERE id = $6
+	RETURNING id, username, email, password, role, created_at, updated_at`
+
+	var user domain.User
+	err := r.db.GetContext(ctx, &user, query, 
+		payload.Username, 
+		payload.Email, 
+		payload.Password, 
+		payload.IsDeleted, 
+		payload.Role, 
+		id,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			
+			return false, common.ErrNotFound
+		}
+
+		return false, err
+	}
+
+	return true, nil
 }

@@ -21,5 +21,7 @@ func UserRoute(router fiber.Router, db *sqlx.DB) {
 	{
 		authRouter.Get("/:email", common.CheckAuth(), handler.FindByEmail )
 		authRouter.Get("/:id", common.CheckAuth(), handler.FindById)
+		authRouter.Patch("/", common.CheckAuth(), handler.Update)
+		authRouter.Delete("/", common.CheckAuth(), handler.Delete)
 	}
 }
