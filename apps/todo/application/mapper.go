@@ -10,9 +10,9 @@ func ToResponse(model *domain.Todo) TodoResponse {
 		Status:     string(model.Status),
 		IsArchived: model.IsArchived,
 		CreatedAt:  model.CreatedAt,
-		StartedAt:  *model.StartedAt,
-		PausedAt:   *model.PausedAt,
-		FinishedAt: *model.FinishedAt,
+		StartedAt:  model.StartedAt,
+		PausedAt:   model.PausedAt,
+		FinishedAt: model.FinishedAt,
 		UpdatedAt:  model.UpdatedAt,
 	}
 }
