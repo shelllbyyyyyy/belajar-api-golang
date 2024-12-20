@@ -1,4 +1,9 @@
-CREATE TYPE IF NOT EXISTS public.roles AS ENUM ('user', 'admin');
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'roles') THEN
+        CREATE TYPE public.roles AS ENUM ('user', 'admin')
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.users (
     id uuid PRIMARY KEY NOT NULL,
