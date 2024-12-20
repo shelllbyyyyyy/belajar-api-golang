@@ -9,7 +9,7 @@ import (
 )
 
 func ConnectPostgres(cfg DBConfig) (db *sqlx.DB, err error) {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta",
 		cfg.Host,
 		cfg.Port,
 		cfg.User,
