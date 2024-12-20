@@ -21,6 +21,12 @@ var (
 	ErrAuthIsNotExists       = errors.New("auth is not exists")
 	ErrEmailAlreadyUsed      = errors.New("email already used")
 	ErrPasswordNotMatch      = errors.New("password not match")
+
+	ErrToDoNameInvalidLength = errors.New("name must have minimum 4 character and maximum 100 character")
+	ErrToDoIsArchived 		 = errors.New("todo is archived")
+	ErrInputCannotBeNull 	 = errors.New("input is required")
+	ErrUpdateToDoFailed 	 = errors.New("update failed")
+	ErrCreateToDoFailed 	 = errors.New("create failed")
 )
 
 type Error struct {
@@ -42,11 +48,11 @@ func (e Error) Error() string {
 }
 
 var (
-	ErrorGeneral         = NewError("Internal Server Error", "500", http.StatusInternalServerError)
-	ErrorBadRequest      = NewError("Bad Request", "400", http.StatusBadRequest)
-	ErrorNotFound        = NewError(ErrNotFound.Error(), "404", http.StatusNotFound)
-	ErrorUnauthorized    = NewError(ErrUnauthorized.Error(), "401", http.StatusUnauthorized)
-	ErrorForbiddenAccess = NewError(ErrForbiddenAccess.Error(), "403", http.StatusForbidden)
+	ErrorGeneral         	   = NewError("Internal Server Error", "500", http.StatusInternalServerError)
+	ErrorBadRequest     	   = NewError("Bad Request", "400", http.StatusBadRequest)
+	ErrorNotFound        	   = NewError(ErrNotFound.Error(), "404", http.StatusNotFound)
+	ErrorUnauthorized    	   = NewError(ErrUnauthorized.Error(), "401", http.StatusUnauthorized)
+	ErrorForbiddenAccess 	   = NewError(ErrForbiddenAccess.Error(), "403", http.StatusForbidden)
 )
 
 var (
@@ -57,9 +63,15 @@ var (
 	ErrorUsernameRequired      = NewError(ErrUsernameRequired.Error(), "400", http.StatusBadRequest)
 	ErrorUsernameInvalidLength = NewError(ErrUsernameInvalidLength.Error(), "400", http.StatusBadRequest)
 
-	ErrorAuthIsNotExists  = NewError(ErrAuthIsNotExists.Error(), "404", http.StatusNotFound)
-	ErrorEmailAlreadyUsed = NewError(ErrEmailAlreadyUsed.Error(), "409", http.StatusConflict)
-	ErrorPasswordNotMatch = NewError(ErrPasswordNotMatch.Error(), "401", http.StatusUnauthorized)
+	ErrorAuthIsNotExists  	   = NewError(ErrAuthIsNotExists.Error(), "404", http.StatusNotFound)
+	ErrorEmailAlreadyUsed 	   = NewError(ErrEmailAlreadyUsed.Error(), "409", http.StatusConflict)
+	ErrorPasswordNotMatch 	   = NewError(ErrPasswordNotMatch.Error(), "401", http.StatusUnauthorized)
+
+	ErrorToDoNameInvalidLength = NewError(ErrToDoNameInvalidLength.Error(), "400", http.StatusBadRequest)
+	ErrorToDoIsArchived 	   = NewError(ErrToDoIsArchived.Error(), "400", http.StatusBadRequest)
+	ErrorInputCannotBeNull 	   = NewError(ErrInputCannotBeNull.Error(), "400", http.StatusBadRequest)
+	ErrorUpdateToDoFailed 	   = NewError(ErrUpdateToDoFailed.Error(), "400", http.StatusBadRequest)
+	ErrorCreateToDoFailed 	   = NewError(ErrCreateToDoFailed.Error(), "400", http.StatusBadRequest)
 )
 
 var (
@@ -67,8 +79,8 @@ var (
 		ErrNotFound.Error():              ErrorNotFound,
 		ErrEmailRequired.Error():         ErrorEmailRequired,
 		ErrEmailInvalid.Error():          ErrorEmailInvalid,
-		ErrUsernameRequired.Error():         ErrorUsernameRequired,
-		ErrUsernameInvalidLength.Error():          ErrorUsernameInvalidLength,
+		ErrUsernameRequired.Error():      ErrorUsernameRequired,
+		ErrUsernameInvalidLength.Error(): ErrorUsernameInvalidLength,
 		ErrPasswordRequired.Error():      ErrorPasswordRequired,
 		ErrPasswordInvalidLength.Error(): ErrorPasswordInvalidLength,
 		ErrAuthIsNotExists.Error():       ErrorAuthIsNotExists,
@@ -76,5 +88,10 @@ var (
 		ErrPasswordNotMatch.Error():      ErrorPasswordNotMatch,
 		ErrUnauthorized.Error():          ErrorUnauthorized,
 		ErrForbiddenAccess.Error():       ErrorForbiddenAccess,
+		ErrToDoNameInvalidLength.Error(): ErrorToDoNameInvalidLength,
+		ErrToDoIsArchived.Error(): 		  ErrorToDoIsArchived,
+		ErrInputCannotBeNull.Error(): 	  ErrorInputCannotBeNull,
+		ErrUpdateToDoFailed.Error(): 	  ErrorUpdateToDoFailed,
+		ErrCreateToDoFailed.Error(): 	  ErrorCreateToDoFailed,
 	}
 )
