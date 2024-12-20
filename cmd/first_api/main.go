@@ -6,7 +6,6 @@ import (
 	"api/first-go/common"
 	"api/first-go/configs"
 	_ "api/first-go/docs/first_api"
-	"api/first-go/scripts"
 	"log"
 	"os"
 	"path/filepath"
@@ -39,7 +38,7 @@ func main() {
         panic(err)
     }
 
-	migrator := scripts.MustGetNewMigrator()
+	// migrator := scripts.MustGetNewMigrator()
     
     err = godotenv.Load(filepath.Join(pwd, "configs", ".env"))
     if err != nil {
@@ -56,10 +55,10 @@ func main() {
 		panic(err)
 	}
 
-	err = migrator.ApplyMigrations(db.DB)
- 	if err != nil {
-		log.Println(err)
- 	}
+	// err = migrator.ApplyMigrations(db.DB)
+ 	// if err != nil {
+	// 	log.Println(err)
+ 	// }
 
 	if db != nil {
 		log.Println("db connected")
@@ -71,7 +70,10 @@ func main() {
 	})
 
 	app.Use(recover.New())
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+        AllowOrigins:     "http://localhost:3000",
+        AllowCredentials: true,
+    }))
 	app.Use(common.LoggerMiddleware())
 
 	app.Get("/", HealthCheck)
