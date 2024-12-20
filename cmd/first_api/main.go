@@ -1,7 +1,8 @@
 package main
 
 import (
-	"api/first-go/apps/auth/presentation/controller"
+	authController "api/first-go/apps/auth/presentation/controller"
+	toDoController "api/first-go/apps/todo/presentation/controller"
 	"api/first-go/common"
 	"api/first-go/configs"
 	_ "api/first-go/docs/first_api"
@@ -55,8 +56,6 @@ func main() {
 		panic(err)
 	}
 
-	defer db.Close()
-
 	err = migrator.ApplyMigrations(db.DB)
  	if err != nil {
 		log.Println(err)
@@ -78,8 +77,9 @@ func main() {
 	app.Get("/", HealthCheck)
 	app.Get("/swagger/*", swagger.HandlerDefault)
 
-	controller.AuthRoute(app, db)
-	controller.UserRoute(app, db)
+	authController.AuthRoute(app, db)
+	authController.UserRoute(app, db)
+	toDoController.TodoRoute(app, db)
 
 	app.Listen(configs.Cfg.App.Port)
 }
